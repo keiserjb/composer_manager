@@ -86,14 +86,14 @@ function composer_manager_sa_vulnerabilities($lock_file, $force_refresh = FALSE)
     return array();
   }
 
+  // 'drush composer-manager' doesn't run a full bootstrap, so on install and
+  // update the Composer autoloader may not be registered.
+  composer_manager_register_autoloader();
+
   // Check if the SecurityChecker class is available.
   if (!class_exists('Enlightn\SecurityChecker\SecurityChecker')) {
     return array();
   }
-
-  // 'drush composer-manager' doesn't run a full bootstrap, so on install and
-  // update the Composer autoloader may not be registered.
-  composer_manager_register_autoloader();
 
   if ($force_refresh || !$vulnerabilities = composer_manager_sa_cache($lock_file)) {
     $checker = new SecurityChecker();
