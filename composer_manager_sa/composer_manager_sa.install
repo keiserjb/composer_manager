@@ -15,6 +15,29 @@ function composer_manager_sa_requirements($phase) {
     $requirements = array();
 
     $lock_file = composer_manager_lock_file();
+
+    // If the lock file doesn't exist, show a message about rebuilding composer.json.
+    if (!$lock_file || !file_exists(backdrop_realpath($lock_file))) {
+      $requirements['composer_manager_security_advisories'] = array(
+        'title' => $t('Composer library security updates'),
+        'value' => $t('Not available'),
+        'description' => $t('The composer.lock file has not been created yet. Visit the <a href="@url">Composer Manager configuration page</a> to rebuild composer.json.', array('@url' => url('admin/config/system/composer-manager'))),
+        'severity' => REQUIREMENT_INFO,
+      );
+      return $requirements;
+    }
+
+    // Check if the SecurityChecker class is available.
+    if (!class_exists('Enlightn\SecurityChecker\SecurityChecker')) {
+      $requirements['composer_manager_security_advisories'] = array(
+        'title' => $t('Composer library security updates'),
+        'value' => $t('Not available'),
+        'description' => $t('The enlightn/security-checker library is not installed. Visit the <a href="@url">Composer Manager configuration page</a> to add the dependency and rebuild composer.json.', array('@url' => url('admin/config/system/composer-manager'))),
+        'severity' => REQUIREMENT_WARNING,
+      );
+      return $requirements;
+    }
+
     $vulnerabilities = composer_manager_sa_cache($lock_file);
     if (is_array($vulnerabilities) && empty($vulnerabilities)) {
       $severity = REQUIREMENT_OK;

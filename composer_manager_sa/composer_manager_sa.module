@@ -81,6 +81,16 @@ function composer_manager_sa_formatted($lock_file, array $vulnerabilities) {
  *   passed.
  */
 function composer_manager_sa_vulnerabilities($lock_file, $force_refresh = FALSE) {
+  // If the lock file doesn't exist, return an empty array.
+  if (!$lock_file || !file_exists(backdrop_realpath($lock_file))) {
+    return array();
+  }
+
+  // Check if the SecurityChecker class is available.
+  if (!class_exists('Enlightn\SecurityChecker\SecurityChecker')) {
+    return array();
+  }
+
   // 'drush composer-manager' doesn't run a full bootstrap, so on install and
   // update the Composer autoloader may not be registered.
   composer_manager_register_autoloader();
